@@ -90,7 +90,7 @@ def analyze_product_influencer_match(
         
         # Call OpenAI API
         response = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=messages,
             max_tokens=1000
         )
