@@ -1,23 +1,40 @@
 import React, { useState } from 'react';
 import FormNavigation from './common/FormNavigation';
 import ProgressBar from './common/ProgressBar';
+import { FormData } from '../types'; // Assuming FormData type definition
 
+// Updated Step interface to include an optional validate function
 interface Step {
   id: string;
   title: string;
-  component: React.ReactNode;
+  component: React.ReactNode; // This is expected to be a React Element, e.g., <ProductInfoStep .../>
+  validate?: (formData: FormData) => Record<string, string> | null;
 }
 
+// Updated MultiStepFormProps to include formData
 interface MultiStepFormProps {
   steps: Step[];
+  formData: FormData;
 }
 
-const MultiStepForm: React.FC<MultiStepFormProps> = ({ steps }) => {
+const MultiStepForm: React.FC<MultiStepFormProps> = ({ steps, formData }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [transitioning, setTransitioning] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string> | null>(null); // State for validation errors
 
   const goToNextStep = () => {
+    setErrors(null); // Clear previous errors before attempting to navigate
+
+    const currentStepDefinition = steps[currentStepIndex];
+    if (currentStepDefinition.validate) {
+      const validationErrors = currentStepDefinition.validate(formData);
+      if (validationErrors && Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return; // Stop navigation if there are errors
+      }
+    }
+
     if (currentStepIndex < steps.length - 1) {
       setTransitioning(true);
       setDirection('forward');
@@ -29,6 +46,7 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ steps }) => {
   };
 
   const goToPreviousStep = () => {
+    setErrors(null); // Clear errors when going back
     if (currentStepIndex > 0) {
       setTransitioning(true);
       setDirection('backward');
@@ -62,7 +80,15 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({ steps }) => {
           className={`transition-all duration-300 ease-in-out transform ${slideClass}`}
         >
           <div className="p-6">
-            {currentStep.component}
+            {/* Render the (potentially cloned) step component */}
+            {(() => {
+              let componentToRender = currentStep.component;
+              if (React.isValidElement(currentStep.component)) {
+                // Ensure errors is always passed, even if null
+                componentToRender = React.cloneElement(currentStep.component as React.ReactElement, { errors });
+              }
+              return componentToRender;
+            })()}
           </div>
         </div>
       </div>

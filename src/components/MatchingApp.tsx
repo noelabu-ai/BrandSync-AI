@@ -6,6 +6,21 @@ import InfluencerInfoStep from './steps/InfluencerInfoStep';
 import ResultsStep from './steps/ResultsStep';
 import { FormData } from '../types';
 
+// Validation function for ProductInfoStep
+const validateProductInfo = (data: FormData): Record<string, string> | null => {
+  const errors: Record<string, string> = {};
+  if (!data.productName?.trim()) {
+    errors.productName = 'Product name is required.';
+  }
+  if (!data.productDescription?.trim()) {
+    errors.productDescription = 'Product description is required.';
+  }
+  if (!data.productPhotos || data.productPhotos.length === 0) {
+    errors.productPhotos = 'Please upload at least one product photo.';
+  }
+  return Object.keys(errors).length > 0 ? errors : null;
+};
+
 const MatchingApp: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     productName: '',
@@ -34,7 +49,8 @@ const MatchingApp: React.FC = () => {
           formData={formData} 
           updateFormData={updateFormData} 
         />
-      )
+      ),
+      validate: validateProductInfo // Add validation function here
     },
     {
       id: 'influencer',
@@ -73,7 +89,8 @@ const MatchingApp: React.FC = () => {
       </div>
 
       <div className="max-w-3xl mx-auto">
-        <MultiStepForm steps={steps} />
+        {/* Pass formData to MultiStepForm */}
+        <MultiStepForm steps={steps} formData={formData} />
       </div>
     </div>
   );

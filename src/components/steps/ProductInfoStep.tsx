@@ -6,9 +6,10 @@ import { FormData } from '../../types';
 interface ProductInfoStepProps {
   formData: FormData;
   updateFormData: (data: Partial<FormData>) => void;
+  errors?: Record<string, string> | null; // Add errors prop
 }
 
-const ProductInfoStep: React.FC<ProductInfoStepProps> = ({ formData, updateFormData }) => {
+const ProductInfoStep: React.FC<ProductInfoStepProps> = ({ formData, updateFormData, errors }) => {
   const handleProductPhotosChange = (files: File[]) => {
     updateFormData({ productPhotos: files });
   };
@@ -36,9 +37,12 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({ formData, updateFormD
             value={formData.productName}
             onChange={(e) => updateFormData({ productName: e.target.value })}
             placeholder="e.g. Organic Aloe Vera Moisturizer"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200"
+            className={`w-full px-4 py-2 border ${errors?.productName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 ${errors?.productName ? 'focus:ring-red-500' : 'focus:ring-purple-500'} focus:border-transparent transition-colors duration-200`}
             required
           />
+          {errors?.productName && (
+            <p className="mt-1 text-xs text-red-600">{errors.productName}</p>
+          )}
         </div>
         
         <div>
@@ -51,9 +55,12 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({ formData, updateFormD
             onChange={(e) => updateFormData({ productDescription: e.target.value })}
             placeholder="Describe your product in a few sentences..."
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200 resize-none"
+            className={`w-full px-4 py-2 border ${errors?.productDescription ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 ${errors?.productDescription ? 'focus:ring-red-500' : 'focus:ring-purple-500'} focus:border-transparent transition-colors duration-200 resize-none`}
             required
           />
+          {errors?.productDescription && (
+            <p className="mt-1 text-xs text-red-600">{errors.productDescription}</p>
+          )}
         </div>
         
         <div>
@@ -66,6 +73,9 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({ formData, updateFormD
             acceptedFileTypes="image/*"
             existingFiles={formData.productPhotos}
           />
+          {errors?.productPhotos && (
+            <p className="mt-1 text-xs text-red-600">{errors.productPhotos}</p>
+          )}
           <p className="mt-2 text-xs text-gray-500">
             Upload up to 5 high-quality photos that showcase your product.
           </p>
